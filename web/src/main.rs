@@ -10,11 +10,11 @@ fn main() {
 
 #[derive(Clone, PartialEq)]
 enum Outcome {
-    Created(String),
+    Created { short_url: String, existing: bool },
     Failed(String),
 }
 
-async fn create_link(url: String) -> Result<String, String> {
+async fn create_link(url: String) -> Result<CreateLinkResponse, String> {
     const NETWORK_ERROR: &str = "서버에 연결할 수 없습니다.";
     let res = Request::post("/api/links")
         .json(&CreateLinkRequest { url })
@@ -24,7 +24,7 @@ async fn create_link(url: String) -> Result<String, String> {
         .map_err(|_| NETWORK_ERROR.to_string())?;
     if res.ok() {
         let body: CreateLinkResponse = res.json().await.map_err(|_| NETWORK_ERROR.to_string())?;
-        Ok(body.short_url)
+        Ok(body)
     } else {
         let message = match res.json::<ErrorResponse>().await {
             Ok(e) => e.message,
@@ -35,7 +35,9 @@ async fn create_link(url: String) -> Result<String, String> {
 }
 
 async fn copy_to_clipboard(text: &str) -> bool {
-    let Some(window) = web_sys::window() else { return false };
+    let Some(window) = web_sys::window() else {
+        return false;
+    };
     wasm_bindgen_futures::JsFuture::from(window.navigator().clipboard().write_text(text))
         .await
         .is_ok()
@@ -53,7 +55,10 @@ fn App() -> Element {
         spawn(async move {
             copied.set(false);
             outcome.set(Some(match create_link(url).await {
-                Ok(short_url) => Outcome::Created(short_url),
+                Ok(body) => Outcome::Created {
+                    short_url: body.short_url,
+                    existing: body.existing,
+                },
                 Err(message) => Outcome::Failed(message),
             }));
         });
@@ -72,8 +77,11 @@ fn App() -> Element {
             button { r#type: "submit", "생성" }
         }
         match outcome() {
-            Some(Outcome::Created(short_url)) => rsx! {
+            Some(Outcome::Created { short_url, existing }) => rsx! {
                 div { class: "result",
+                    if existing {
+                        span { class: "notice", "이미 만들어진 주소예요" }
+                    }
                     a { href: "{short_url}", "{short_url}" }
                     button {
                         onclick: move |_| {

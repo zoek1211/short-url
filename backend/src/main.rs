@@ -10,6 +10,7 @@ async fn main() -> anyhow::Result<()> {
     let database_url = env::var("DATABASE_URL")?;
     let public_base_url =
         env::var("PUBLIC_BASE_URL").unwrap_or_else(|_| "http://localhost:8080".into());
+    let backend_base_url = env::var("BACKEND_BASE_URL").ok().filter(|v| !v.is_empty());
     let port = env::var("PORT").unwrap_or_else(|_| "8080".into());
 
     let pool = PgPoolOptions::new().connect(&database_url).await?;
@@ -17,6 +18,16 @@ async fn main() -> anyhow::Result<()> {
 
     let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{port}")).await?;
     tracing::info!("listening on {}", listener.local_addr()?);
-    axum::serve(listener, router(pool, Config { public_base_url })).await?;
+    axum::serve(
+        listener,
+        router(
+            pool,
+            Config {
+                public_base_url,
+                backend_base_url,
+            },
+        ),
+    )
+    .await?;
     Ok(())
 }

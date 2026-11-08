@@ -18,7 +18,10 @@ static PG: OnceCell<(ContainerAsync<Postgres>, String)> = OnceCell::const_new();
 async fn admin_url() -> &'static str {
     let (_, url) = PG
         .get_or_init(|| async {
-            let c = Postgres::default().start().await.expect("start postgres (is Docker running?)");
+            let c = Postgres::default()
+                .start()
+                .await
+                .expect("start postgres (is Docker running?)");
             let port = c.get_host_port_ipv4(5432).await.unwrap();
             (c, format!("postgres://postgres:postgres@127.0.0.1:{port}"))
         })
@@ -30,15 +33,26 @@ async fn admin_url() -> &'static str {
 pub async fn test_pool() -> PgPool {
     let admin = admin_url().await;
     let db = format!("t_{}", uuid::Uuid::new_v4().simple());
-    let mut conn = PgConnection::connect(&format!("{admin}/postgres")).await.unwrap();
-    sqlx::query(&format!("CREATE DATABASE {db}")).execute(&mut conn).await.unwrap();
+    let mut conn = PgConnection::connect(&format!("{admin}/postgres"))
+        .await
+        .unwrap();
+    sqlx::query(&format!("CREATE DATABASE {db}"))
+        .execute(&mut conn)
+        .await
+        .unwrap();
     let pool = PgPool::connect(&format!("{admin}/{db}")).await.unwrap();
     MIGRATOR.run(&pool).await.unwrap();
     pool
 }
 
 pub fn app_for(pool: PgPool) -> Router {
-    router(pool, Config { public_base_url: "http://localhost:8080".into() })
+    router(
+        pool,
+        Config {
+            public_base_url: "http://localhost:8080".into(),
+            backend_base_url: Some("http://api.example.test:3000".into()),
+        },
+    )
 }
 
 pub async fn test_app() -> Router {
@@ -57,7 +71,12 @@ async fn send(app: &Router, req: Request<Body>) -> Res {
     let (parts, body) = res.into_parts();
     let body = body.collect().await.unwrap().to_bytes().to_vec();
     let json = serde_json::from_slice(&body).unwrap_or(serde_json::Value::Null);
-    Res { status: parts.status, headers: parts.headers, body, json }
+    Res {
+        status: parts.status,
+        headers: parts.headers,
+        body,
+        json,
+    }
 }
 
 pub async fn get(app: &Router, path: &str) -> Res {

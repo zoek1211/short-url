@@ -54,6 +54,7 @@ cargo test
 | --- | --- | --- |
 | `DATABASE_URL` | Postgres 접속 주소 | 없음(필수) |
 | `PUBLIC_BASE_URL` | 단축 주소를 만들 때 쓰는 공개 기본 주소 | `http://localhost:8080` |
+| `BACKEND_BASE_URL` | 백엔드 자체 주소. 이 호스트를 가리키는 원본 URL을 거부하는 데 씀(선택) | 없음 |
 | `PORT` | 백엔드 수신 포트 | `8080` |
 
 실제 비밀 값은 저장소에 넣지 않습니다. 형식은 `.env.example`을 참고하세요.
