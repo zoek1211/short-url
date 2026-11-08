@@ -1,0 +1,5 @@
+CREATE TABLE links (
+    number       BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    original_url TEXT NOT NULL UNIQUE,
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT now()
+);

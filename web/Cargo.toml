@@ -1,0 +1,12 @@
+[package]
+name = "web"
+edition.workspace = true
+version.workspace = true
+
+[dependencies]
+shared = { path = "../shared" }
+dioxus = { version = "0.7", features = ["web"] }
+gloo-net = { version = "0.6", default-features = false, features = ["http", "json"] }
+gloo-timers = { version = "0.3", features = ["futures"] }
+wasm-bindgen-futures = "0.4"
+web-sys = { version = "0.3", features = ["Window", "Navigator", "Clipboard"] }

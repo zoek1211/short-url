@@ -1,0 +1,11 @@
+[application]
+name = "web"
+
+[web.app]
+title = "단축 주소"
+
+[web.watcher]
+index_on_404 = true
+
+[[web.proxy]]
+backend = "http://localhost:8080/api/"
