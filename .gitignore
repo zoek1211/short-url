@@ -2,3 +2,6 @@ target/
 dist/
 .env
 .claude/settings.local.json
+worker/node_modules/
+worker/public/
+.wrangler/

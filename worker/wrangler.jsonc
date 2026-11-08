@@ -1,0 +1,19 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "short-url",
+  "main": "src/index.js",
+  "compatibility_date": "2026-11-01",
+  "workers_dev": true,
+  "preview_urls": false,
+  "assets": {
+    // dx bundle --platform web --release 결과물
+    "directory": "../target/dx/web/release/web/public",
+    "binding": "ASSETS",
+    "run_worker_first": true,
+    "not_found_handling": "single-page-application"
+  },
+  "vars": {
+    // 비밀이 아닌 백엔드 주소. 브라우저 코드에는 들어가지 않는다.
+    "BACKEND_URL": "https://backend-production-e980.up.railway.app"
+  }
+}
