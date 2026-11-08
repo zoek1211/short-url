@@ -1,0 +1,17 @@
+target/
+**/target/
+dist/
+web/dist/
+.git/
+.gitignore
+.scratch/
+.claude/
+.env
+.env.*
+!.env.example
+docs/
+*.md
+docker-compose.yml
+Dockerfile
+.dockerignore
+.DS_Store

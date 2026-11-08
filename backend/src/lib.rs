@@ -25,10 +25,15 @@ pub static MIGRATOR: sqlx::migrate::Migrator = sqlx::migrate!();
 
 pub fn router(pool: PgPool, config: Config) -> Router {
     Router::new()
+        .route("/healthz", get(healthz))
         .route("/api/links", post(create_link))
         .route("/api/links/{number}", get(show_link))
         .route("/{number}", get(redirect))
         .with_state(AppState { pool, config })
+}
+
+async fn healthz() -> &'static str {
+    "ok"
 }
 
 enum ApiError {

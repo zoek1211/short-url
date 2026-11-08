@@ -58,3 +58,20 @@ cargo test
 | `PORT` | 백엔드 수신 포트 | `8080` |
 
 실제 비밀 값은 저장소에 넣지 않습니다. 형식은 `.env.example`을 참고하세요.
+
+## Railway 배포
+
+백엔드는 Railway에서 저장소 루트의 `Dockerfile`로 빌드합니다. 이미지는 `cargo build --release -p backend`로 백엔드 바이너리만 만들며(web은 포함하지 않음), 비루트 사용자로 실행됩니다.
+
+Railway 백엔드 서비스에 설정할 환경변수:
+
+| 이름 | 값 |
+| --- | --- |
+| `DATABASE_URL` | `${{Postgres.DATABASE_URL}}` (Railway Postgres 서비스 변수 참조) |
+| `PUBLIC_BASE_URL` | 단축 주소로 보여 줄 공개 기본 주소 |
+| `BACKEND_BASE_URL` | 백엔드 자신의 주소 (선택) |
+| `PORT` | Railway가 주입합니다. 직접 설정하지 않습니다. |
+
+- 마이그레이션: 백엔드가 시작할 때 자동으로 실행합니다.
+- 헬스체크: `GET /healthz`가 200 `ok`를 돌려줍니다. 헬스체크 경로(`/healthz`)와 재시작 정책은 설정 파일이 아니라 Railway 서비스 설정에서 지정합니다.
+- Cloudflare(웹 화면) 배포는 티켓 07에서 다룹니다.
