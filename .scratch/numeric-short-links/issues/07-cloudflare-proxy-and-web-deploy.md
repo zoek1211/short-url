@@ -14,7 +14,7 @@
 - [x] 백엔드 주소는 Worker 환경변수로 설정되고 브라우저 코드에 들어가지 않는다
 - [x] Railway 백엔드의 공개 기본 주소 환경변수가 Cloudflare 공개 주소로 설정되어, 화면에 공개 주소 기준 단축 주소가 보인다
 - [x] GitHub Actions가 push 때 화면을 빌드하고 `wrangler deploy`로 배포한다. 토큰은 GitHub Secrets에만 있다
-- [ ] 공개 주소에 HTTPS로 접속해 로그인 없이 생성, 복사, 이동이 동작한다
+- [x] 공개 주소에 HTTPS로 접속해 로그인 없이 생성, 복사, 이동이 동작한다
 
 ## Comments
 
@@ -28,3 +28,4 @@
 - GitHub Actions(2026-11-09): 첫 실행은 토큰이 계정에 적용되지 않아 "No access to the specified service"로 배포 단계만 실패했다. 사용자가 토큰을 다시 만들어(Workers Scripts Edit, Account Settings Read, User Details Read, 이 계정 한정) 등록한 뒤 재실행해 성공했다(run 42539508380). 배포 후 공개 주소에서 `/` 200, `/4` 302, 중복 200, 404, 405를 다시 확인했다.
 - 남은 확인: 실제 브라우저(시크릿 창)에서 복사 버튼 동작. 확인되면 마지막 항목을 체크한다.
 - 공개 주소 변경(2026-11-09): 사용자가 계정 하위 도메인을 `zoek`으로 바꾸고, Worker 이름을 `s`로 바꿔 공개 주소가 `https://s.zoek.workers.dev`가 됐다. Railway `PUBLIC_BASE_URL`도 이 주소로 바꿨다. 새 주소에서 `/` 200, `/4` 302, 중복 200(`short_url`이 새 주소), 자기 주소 400, 404, 405 확인. 예전 주소는 더 이상 응답하지 않는다. 예전 Worker `short-url`은 Cloudflare에 남아 있다.
+- 사용자 확인(2026-11-09): 시크릿 창과 다른 브라우저에서 생성·복사·이동이 동작한다고 사용자가 확인했다.

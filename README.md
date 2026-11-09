@@ -170,7 +170,7 @@ npx wrangler dev   # http://localhost:8787
 | 호스트 없음, 공백 포함, 2048바이트 초과 | 400 | 통과(자동 테스트) | `cargo test` (`backend/tests/links.rs`) |
 | DB의 UPDATE/DELETE/TRUNCATE | 트리거가 거부 | 통과(자동 테스트) | `cargo test` (`backend/tests/immutability.rs`) |
 | Railway 재배포·프로세스 재시작 후 | 기존 링크가 같은 원본 URL로 이동 | 통과(수동 확인) | 링크 생성 후 `railway redeploy`, 다시 `/<번호>` 열기 |
-| 시크릿 창·다른 브라우저에서 생성·복사·이동 | 생성·복사 표시·이동 동작 | **미확인**(복사 버튼은 실제 브라우저에서 확인 필요) | 아래 수동 확인 |
+| 시크릿 창·다른 브라우저에서 생성·복사·이동 | 생성·복사 표시·이동 동작 | 통과(사용자 수동 확인) | 아래 수동 확인 |
 
 ### 점검 스크립트
 
