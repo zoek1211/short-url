@@ -4522,7 +4522,9 @@ dependencies = [
  "dioxus",
  "gloo-net",
  "gloo-timers",
+ "js-sys",
  "shared",
+ "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
 ]

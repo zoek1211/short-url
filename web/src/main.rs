@@ -2,6 +2,9 @@ use dioxus::prelude::*;
 use gloo_net::http::Request;
 use shared::{CreateLinkRequest, CreateLinkResponse, ErrorResponse};
 
+mod i18n;
+use i18n::Lang;
+
 const MAIN_CSS: Asset = asset!("/assets/main.css");
 
 fn main() {
@@ -9,28 +12,33 @@ fn main() {
 }
 
 #[derive(Clone, PartialEq)]
-enum Outcome {
-    Created { short_url: String, existing: bool },
-    Failed(String),
+enum Failure {
+    Network,
+    Unknown,
+    /// Message from the server, already in the language chosen at request time.
+    Server(String),
 }
 
-async fn create_link(url: String) -> Result<CreateLinkResponse, String> {
-    const NETWORK_ERROR: &str = "서버에 연결할 수 없습니다.";
+#[derive(Clone, PartialEq)]
+enum Outcome {
+    Created { short_url: String, existing: bool },
+    Failed(Failure),
+}
+
+async fn create_link(url: String) -> Result<CreateLinkResponse, Failure> {
     let res = Request::post("/api/links")
         .json(&CreateLinkRequest { url })
-        .map_err(|_| NETWORK_ERROR.to_string())?
+        .map_err(|_| Failure::Network)?
         .send()
         .await
-        .map_err(|_| NETWORK_ERROR.to_string())?;
+        .map_err(|_| Failure::Network)?;
     if res.ok() {
-        let body: CreateLinkResponse = res.json().await.map_err(|_| NETWORK_ERROR.to_string())?;
-        Ok(body)
+        res.json().await.map_err(|_| Failure::Network)
     } else {
-        let message = match res.json::<ErrorResponse>().await {
-            Ok(e) => e.message,
-            Err(_) => "알 수 없는 오류가 발생했습니다.".to_string(),
-        };
-        Err(message)
+        Err(match res.json::<ErrorResponse>().await {
+            Ok(e) => Failure::Server(e.message),
+            Err(_) => Failure::Unknown,
+        })
     }
 }
 
@@ -48,6 +56,12 @@ fn App() -> Element {
     let mut input = use_signal(String::new);
     let mut outcome = use_signal(|| None::<Outcome>);
     let mut copied = use_signal(|| false);
+    let mut lang = use_signal(|| {
+        let detected = Lang::detect();
+        detected.apply(false);
+        detected
+    });
+    let t = lang().text();
 
     let submit = move |evt: FormEvent| {
         evt.prevent_default();
@@ -59,28 +73,39 @@ fn App() -> Element {
                     short_url: body.short_url,
                     existing: body.existing,
                 },
-                Err(message) => Outcome::Failed(message),
+                Err(failure) => Outcome::Failed(failure),
             }));
         });
     };
 
     rsx! {
         document::Stylesheet { href: MAIN_CSS }
-        h1 { "단축 주소" }
+        document::Title { "{t.title}" }
+        button {
+            class: "lang",
+            r#type: "button",
+            onclick: move |_| {
+                let next = lang().other();
+                next.apply(true);
+                lang.set(next);
+            },
+            "{t.switch_to}"
+        }
+        h1 { "{t.title}" }
         form { onsubmit: submit,
             input {
                 r#type: "text",
-                placeholder: "원본 URL을 입력하세요",
+                placeholder: t.placeholder,
                 value: "{input}",
                 oninput: move |e| input.set(e.value()),
             }
-            button { r#type: "submit", "생성" }
+            button { r#type: "submit", "{t.create}" }
         }
         match outcome() {
             Some(Outcome::Created { short_url, existing }) => rsx! {
                 div { class: "result",
                     if existing {
-                        span { class: "notice", "이미 만들어진 주소예요" }
+                        span { class: "notice", "{t.existing}" }
                     }
                     a { href: "{short_url}", "{short_url}" }
                     button {
@@ -94,14 +119,21 @@ fn App() -> Element {
                                 }
                             });
                         },
-                        "복사"
+                        "{t.copy}"
                     }
                     if copied() {
-                        span { class: "copied", "복사됨" }
+                        span { class: "copied", "{t.copied}" }
                     }
                 }
             },
-            Some(Outcome::Failed(message)) => rsx! { div { class: "error", "{message}" } },
+            Some(Outcome::Failed(failure)) => {
+                let message = match failure {
+                    Failure::Network => t.network_error.to_string(),
+                    Failure::Unknown => t.unknown_error.to_string(),
+                    Failure::Server(message) => message,
+                };
+                rsx! { div { class: "error", "{message}" } }
+            }
             None => rsx! {},
         }
     }

@@ -20,12 +20,25 @@ async fn admin_url() -> &'static str {
         .get_or_init(|| async {
             // The container lives in a static, which is never dropped, so it would
             // leak once per test binary per run. Reuse one named container instead.
-            let c = Postgres::default()
-                .with_container_name("short-url-test-pg")
-                .with_reuse(ReuseDirective::Always)
-                .start()
-                .await
-                .expect("start postgres (is Docker running?)");
+            let start = || {
+                Postgres::default()
+                    .with_container_name("short-url-test-pg")
+                    .with_reuse(ReuseDirective::Always)
+                    .start()
+            };
+            let c = match start().await {
+                Ok(c) => c,
+                // Reuse only finds a running container. After a Docker restart the
+                // stopped one still holds the name, so remove it and start fresh.
+                Err(e) if e.to_string().contains("already in use") => {
+                    std::process::Command::new("docker")
+                        .args(["rm", "-f", "short-url-test-pg"])
+                        .status()
+                        .expect("run docker rm");
+                    start().await.expect("start postgres")
+                }
+                Err(e) => panic!("start postgres (is Docker running?): {e}"),
+            };
             let port = c.get_host_port_ipv4(5432).await.unwrap();
             (c, format!("postgres://postgres:postgres@127.0.0.1:{port}"))
         })
@@ -95,4 +108,23 @@ pub async fn post_json(app: &Router, path: &str, body: &str) -> Res {
         .body(Body::from(body.to_owned()))
         .unwrap();
     send(app, req).await
+}
+
+pub async fn get_with(app: &Router, path: &str, headers: &[(&str, &str)]) -> Res {
+    let mut req = Request::get(path);
+    for (k, v) in headers {
+        req = req.header(*k, *v);
+    }
+    send(app, req.body(Body::empty()).unwrap()).await
+}
+
+pub async fn post_json_with(app: &Router, path: &str, body: &str, headers: &[(&str, &str)]) -> Res {
+    let mut req = Request::builder()
+        .method(Method::POST)
+        .uri(path)
+        .header(header::CONTENT_TYPE, "application/json");
+    for (k, v) in headers {
+        req = req.header(*k, *v);
+    }
+    send(app, req.body(Body::from(body.to_owned())).unwrap()).await
 }

@@ -65,9 +65,9 @@ async fn same_url_created_concurrently_yields_one_number_and_one_row() {
     let mut set = JoinSet::new();
     for _ in 0..50 {
         let app = app.clone();
-        set.spawn(async move {
-            post_json(&app, "/api/links", &body("https://example.com/same")).await
-        });
+        set.spawn(
+            async move { post_json(&app, "/api/links", &body("https://example.com/same")).await },
+        );
     }
     let mut numbers = HashSet::new();
     let mut created = 0;

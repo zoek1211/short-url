@@ -14,7 +14,10 @@ async fn assert_not_found_page(app: &axum::Router, path: &str) -> String {
     let body = String::from_utf8(res.body).unwrap();
     assert!(body.contains("단축 주소"), "path: {path}");
     assert!(body.contains("존재하지 않"), "path: {path}");
-    assert!(body.contains(r#"href="http://localhost:8080/""#), "path: {path}");
+    assert!(
+        body.contains(r#"href="http://localhost:8080/""#),
+        "path: {path}"
+    );
     body
 }
 

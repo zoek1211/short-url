@@ -5,3 +5,5 @@ button { padding: .5rem 1rem; font-size: 1rem; cursor: pointer; }
 .result { margin-top: 1rem; display: flex; align-items: center; gap: .5rem; }
 .error { margin-top: 1rem; color: #c00; }
 .copied { color: #080; }
+body { position: relative; }
+.lang { position: absolute; top: -3rem; right: 1rem; padding: .35rem .75rem; font-size: .9rem; }
