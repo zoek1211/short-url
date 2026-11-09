@@ -27,3 +27,4 @@
 - GitHub Secrets 등록은 사용자 몫(자동 모드에서 비밀 저장소 쓰기가 거부됨). 등록 전까지 워크플로는 push하지 않는다.
 - GitHub Actions(2026-11-09): 첫 실행은 토큰이 계정에 적용되지 않아 "No access to the specified service"로 배포 단계만 실패했다. 사용자가 토큰을 다시 만들어(Workers Scripts Edit, Account Settings Read, User Details Read, 이 계정 한정) 등록한 뒤 재실행해 성공했다(run 42539508380). 배포 후 공개 주소에서 `/` 200, `/4` 302, 중복 200, 404, 405를 다시 확인했다.
 - 남은 확인: 실제 브라우저(시크릿 창)에서 복사 버튼 동작. 확인되면 마지막 항목을 체크한다.
+- 공개 주소 변경(2026-11-09): 사용자가 계정 하위 도메인을 `zoek`으로 바꾸고, Worker 이름을 `s`로 바꿔 공개 주소가 `https://s.zoek.workers.dev`가 됐다. Railway `PUBLIC_BASE_URL`도 이 주소로 바꿨다. 새 주소에서 `/` 200, `/4` 302, 중복 200(`short_url`이 새 주소), 자기 주소 400, 404, 405 확인. 예전 주소는 더 이상 응답하지 않는다. 예전 Worker `short-url`은 Cloudflare에 남아 있다.
