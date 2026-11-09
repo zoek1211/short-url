@@ -8,7 +8,7 @@ use axum::{
 use backend::{Config, MIGRATOR, router};
 use http_body_util::BodyExt;
 use sqlx::{Connection, PgConnection, PgPool};
-use testcontainers::{ContainerAsync, runners::AsyncRunner};
+use testcontainers::{ContainerAsync, ImageExt, ReuseDirective, runners::AsyncRunner};
 use testcontainers_modules::postgres::Postgres;
 use tokio::sync::OnceCell;
 use tower::ServiceExt;
@@ -18,7 +18,11 @@ static PG: OnceCell<(ContainerAsync<Postgres>, String)> = OnceCell::const_new();
 async fn admin_url() -> &'static str {
     let (_, url) = PG
         .get_or_init(|| async {
+            // The container lives in a static, which is never dropped, so it would
+            // leak once per test binary per run. Reuse one named container instead.
             let c = Postgres::default()
+                .with_container_name("short-url-test-pg")
+                .with_reuse(ReuseDirective::Always)
                 .start()
                 .await
                 .expect("start postgres (is Docker running?)");

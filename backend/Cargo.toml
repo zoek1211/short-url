@@ -17,6 +17,6 @@ tracing-subscriber = "0.3"
 [dev-dependencies]
 tower = { version = "0.5", features = ["util"] }
 http-body-util = "0.1"
-testcontainers = "0.23"
+testcontainers = { version = "0.23", features = ["reusable-containers"] }
 testcontainers-modules = { version = "0.11", features = ["postgres"] }
 uuid = { version = "1", features = ["v4"] }

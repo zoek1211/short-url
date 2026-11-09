@@ -56,7 +56,7 @@
 
 ## 테스트
 
-Docker가 실행 중이어야 합니다. 테스트마다 testcontainers로 새 Postgres DB를 만들고, axum 라우터에 요청을 직접 보내 HTTP 동작을 검증합니다.
+Docker가 실행 중이어야 합니다. testcontainers가 `short-url-test-pg`라는 Postgres 컨테이너 하나를 띄워 계속 재사용하고, 그 안에 테스트마다 새 DB를 만들어 axum 라우터에 요청을 직접 보내 HTTP 동작을 검증합니다. 컨테이너는 테스트가 끝나도 남아 있으며, 필요 없으면 `docker rm -f short-url-test-pg`로 지웁니다.
 
 ```bash
 cargo test
