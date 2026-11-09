@@ -173,8 +173,8 @@ npx wrangler dev   # http://localhost:8787
 | 서로 다른 URL 5개 동시 생성 | 서로 다른 번호 5개, 각자의 원본 URL로 302 | 통과 | 점검 스크립트 |
 | 같은 URL 동시 생성 | 번호 하나 | 통과(자동 테스트) | `cargo test` (`backend/tests/duplicates.rs`) |
 | 없는 번호, `/042`, `/0` | 404 안내 화면(HTML, 기본 한국어) | 통과 | 점검 스크립트, `backend/tests/not_found.rs` |
-| `lang=en` 쿠키 또는 영어 `Accept-Language` | 오류 메시지와 404 안내 화면이 영어, 쿠키가 `Accept-Language`보다 우선 | 통과(자동 테스트) | `cargo test` (`backend/tests/language.rs`) |
-| 화면의 언어 버튼 | 글자가 바뀌고, 새로고침해도 선택 유지 | 통과(로컬 브라우저 확인) | 아래 수동 확인 6번 |
+| `lang=en` 쿠키 또는 영어 `Accept-Language` | 오류 메시지와 404 안내 화면이 영어, 쿠키가 `Accept-Language`보다 우선 | 통과 | 배포 주소에 직접 요청, `cargo test` (`backend/tests/language.rs`) |
+| 화면의 언어 버튼 | 글자가 바뀌고, 새로고침해도 선택 유지 | 통과(배포 주소 브라우저 확인) | 아래 수동 확인 6번 |
 | PUT/PATCH/DELETE | 405, 이후에도 링크 그대로 | 통과 | 점검 스크립트 |
 | 잘못된 URL(`ftp://`, 사용자 정보, 자기 링크) | 400 | 통과 | 점검 스크립트 |
 | `url` 외 필드가 있는 본문 | 400 | 통과 | 점검 스크립트 |
@@ -419,8 +419,8 @@ Results checked on the deployed public URL (2026-11-09). They can be reproduced 
 | Create 5 different URLs concurrently | 5 different numbers, each redirects to its own original URL | Pass | smoke-check script |
 | Create the same URL concurrently | One number | Pass (automated test) | `cargo test` (`backend/tests/duplicates.rs`) |
 | Unknown number, `/042`, `/0` | 404 page (HTML, Korean by default) | Pass | smoke-check script, `backend/tests/not_found.rs` |
-| `lang=en` cookie or English `Accept-Language` | Error messages and the 404 page in English; the cookie wins over `Accept-Language` | Pass (automated test) | `cargo test` (`backend/tests/language.rs`) |
-| Language button on the screen | Text switches and the choice survives a reload | Pass (local browser check) | manual check step 6 below |
+| `lang=en` cookie or English `Accept-Language` | Error messages and the 404 page in English; the cookie wins over `Accept-Language` | Pass | direct requests to the deployed URL, `cargo test` (`backend/tests/language.rs`) |
+| Language button on the screen | Text switches and the choice survives a reload | Pass (browser check on the deployed URL) | manual check step 6 below |
 | PUT/PATCH/DELETE | 405, link unchanged afterwards | Pass | smoke-check script |
 | Invalid URL (`ftp://`, user info, self-link) | 400 | Pass | smoke-check script |
 | Body with fields other than `url` | 400 | Pass | smoke-check script |
